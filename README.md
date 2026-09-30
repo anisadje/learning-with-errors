@@ -1,66 +1,67 @@
-# Learning With Errors (LWE) — implémentation et analyse expérimentale
+# Learning With Errors (LWE) — implementation and experimental analysis
+🇫🇷 A French version of the notebook is available: [LWE_FR.ipynb](LWE_FR.ipynb)
 
-> Implémentation *from scratch* d'un cryptosystème symétrique fondé sur le problème **Learning With Errors**, accompagnée d'une étude empirique de l'impact des paramètres ($\sigma$, $m$, $n$, $q$) sur la fiabilité du déchiffrement et la sécurité.
+> A *from scratch* implementation of a symmetric cryptosystem based on the **Learning With Errors** problem, with an empirical study of the impact of the parameters ($\sigma$, $m$, $n$, $q$) on decryption reliability and security.
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
 ![NumPy](https://img.shields.io/badge/NumPy-✓-013243)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-*Projet réalisé dans le cadre d'un apprentissage personnel.*
+*Personal learning project.*
 
 ---
 
-## Contexte
+## Context
 
-Les cryptosystèmes à clé publique actuels (RSA, ECC) reposent sur la difficulté de la factorisation et du logarithme discret; deux problèmes que l'algorithme de Shor casse en temps polynomial sur un ordinateur quantique. La cryptographie post-quantique cherche des problèmes résistants : **LWE** (Regev, 2005) en est l'un des piliers, à la base du standard NIST **ML-KEM / Kyber** (FIPS 203).
+Current public-key cryptosystems (RSA, ECC) rely on the hardness of factorization and of the discrete logarithm; two problems that Shor's algorithm breaks in polynomial time on a quantum computer. Post-quantum cryptography looks for problems that resist these attacks: **LWE** (Regev, 2005) is one of its pillars, and it is the basis of the NIST standard **ML-KEM / Kyber** (FIPS 203).
 
-Ce notebook construit, pas à pas et sans bibliothèque cryptographique, une instance LWE en clé secrète, puis explore expérimentalement la frontière entre **bruit suffisant pour masquer le secret** et **bruit trop élevé pour déchiffrer**.
+This notebook builds, step by step and without any cryptographic library, a secret-key LWE instance, then experimentally explores the boundary between **enough noise to hide the secret** and **too much noise to decrypt**.
 
-## Contenu du notebook
+## Notebook contents
 
-| Partie | Sujet |
+| Part | Topic |
 |---|---|
-| **1. Introduction** | Rupture quantique, vulnérabilité de RSA/ECC, émergence de LWE |
-| **2. Briques élémentaires** | Échantillonnage gaussien discret, génération de clés, chiffrement/déchiffrement d'un bit |
-| **3. Validation expérimentale** | Test sur instance isolée puis sur 100 messages |
-| **4. Analyse paramétrique** | Transitions de phase selon $\sigma$, $m$, $n$, $q$ ; analyse croisée $(m, \sigma)$ par heatmap |
-| **5. Bilan & ouverture** | Comparaison RSA vs LWE, limites, ouverture vers Ring-LWE / Kyber |
+| **1. Introduction** | The quantum threat, vulnerability of RSA/ECC, emergence of LWE |
+| **2. Building blocks** | Discrete Gaussian sampling, key generation, encryption/decryption of one bit |
+| **3. Experimental validation** | Test on a single instance, then on 100 messages |
+| **4. Parametric analysis** | Phase transitions depending on $\sigma$, $m$, $n$, $q$; cross analysis of $(m, \sigma)$ with a heatmap |
+| **5. Summary & outlook** | RSA vs LWE comparison, limitations, outlook on Ring-LWE / Kyber |
 
-## Résultats clés
+## Key results
 
-- **Le bruit est indispensable** : à $\sigma = 0$, le système se résout instantanément par pivot de Gauss. Le bruit gaussien transforme une distribution en cloche (sur $e$) en une distribution quasi-uniforme (sur $b$), ce qui masque le secret.
-- **Transition de phase nette sur $m$** (nombre d'équations) : en dessous d'un seuil, le taux de succès est instable ; au-delà, la redondance permet de tolérer un bruit plus élevé.
-- **$n$ joue sur la sécurité, pas sur la fiabilité** : faire varier la dimension du secret laisse les courbes de déchiffrement quasi superposées; $n$ est le paramètre de sécurité.
-- **$q$ dicte la tolérance au bruit** : un grand modulo « offre de l'espace » au bruit avant qu'il ne franchisse le seuil de décision $\lfloor q/4 \rfloor$.
+- **Noise is necessary**: with $\sigma = 0$, the system is solved instantly by Gaussian elimination. The Gaussian noise turns a bell-shaped distribution (on $e$) into an almost uniform distribution (on $b$), which hides the secret.
+- **Clear phase transition on $m$** (number of equations): below a threshold, the success rate is unstable; above it, the redundancy makes it possible to tolerate more noise.
+- **$n$ affects security, not reliability**: varying the dimension of the secret leaves the decryption curves almost overlapping; $n$ is the security parameter.
+- **$q$ determines the noise tolerance**: a large modulus "gives room" to the noise before it crosses the decision threshold $\lfloor q/4 \rfloor$.
 
-## Exécution
+## How to run
 
-### En ligne (recommandé, zéro installation)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/anisadje/learning-with-errors/blob/main/LWE.ipynb)
+### Online (recommended, no installation)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/anisadje/learning-with-errors/blob/main/LWE_EN.ipynb)
 
-### En local
+### Locally
 ```bash
 git clone https://github.com/anisadje/learning-with-errors.git
 cd learning-with-errors
 pip install -r requirements.txt
-jupyter notebook LWE.ipynb
+jupyter notebook LWE_EN.ipynb
 ```
 
-## Limites connues & pistes
+## Known limitations & next steps
 
-- **Paramètres-jouets** : les valeurs choisies ($n=2$, $q=11$) ont pour but la visualisation, cela ne représente pas la sécurité réelle; l'espace des secrets ($q^n = 121$) se brute-force trivialement. 
-- **Échecs de déchiffrement** (*decryption failures*) : ~2 % observés à certains réglages.
-- **Variante symétrique** : ce projet implémente LWE à clé secrète, pas le schéma à clé publique complet.
-- **Ouverture** : la taille quadratique de la matrice $A$ motive le passage à **Ring-LWE** ($\mathbb{Z}_q[X]/(X^n+1)$) et à **Kyber/ML-KEM**; direction naturelle d'extension du projet.
+- **Toy parameters**: the chosen values ($n=2$, $q=11$) are meant for visualization and do not represent real security; the secret space ($q^n = 121$) can be brute-forced trivially.
+- **Decryption failures**: ~2% observed with some settings.
+- **Symmetric variant**: this project implements secret-key LWE, not the full public-key scheme.
+- **Outlook**: the quadratic size of the matrix $A$ motivates moving to **Ring-LWE** ($\mathbb{Z}_q[X]/(X^n+1)$) and to **Kyber/ML-KEM**; a natural direction to extend the project.
 
-## Stack technique
+## Tech stack
 
 Python · NumPy · Matplotlib · Seaborn
 
-## Références principales
+## Main references
 
-Regev (2005), *On lattices, learning with errors…* (JACM) · Shor (1994) · NIST FIPS 203 (2024) · Micciancio, CSE 208 (UC San Diego). *Bibliographie complète en fin de notebook.*
+Regev (2005), *On lattices, learning with errors…* (JACM) · Shor (1994) · NIST FIPS 203 (2024) · Micciancio, CSE 208 (UC San Diego). *Full bibliography at the end of the notebook.*
 
-## Auteure
+## Author
 
 **Anîsa Djedje** — [GitHub](https://github.com/anisadje)
