@@ -32,7 +32,7 @@ This notebook builds, step by step and without any cryptographic library, a secr
 - **Noise is necessary**: with $\sigma = 0$, the system is solved instantly by Gaussian elimination. The Gaussian noise turns a bell-shaped distribution (on $e$) into an almost uniform distribution (on $b$), which hides the secret.
 - **Clear phase transition on $m$** (number of equations): below a threshold, the success rate is unstable; above it, the redundancy makes it possible to tolerate more noise.
 - **$n$ affects security, not reliability**: varying the dimension of the secret leaves the decryption curves almost overlapping; $n$ is the security parameter.
-- **$q$ determines the noise tolerance**: a large modulus "gives room" to the noise before it crosses the decision threshold $\lfloor q/4 \rfloor$.
+- **$q$ determines the noise tolerance**: a large modulus "gives room" to the noise before it crosses the decision threshold $q/4$.
 
 ## How to run
 
@@ -50,7 +50,7 @@ jupyter notebook LWE_EN.ipynb
 ## Known limitations & next steps
 
 - **Toy parameters**: the chosen values ($n=2$, $q=11$) are meant for visualization and do not represent real security; the secret space ($q^n = 121$) can be brute-forced trivially.
-- **Decryption failures**: ~2% observed with some settings.
+- **Decryption failures**: they appear as soon as the noise becomes comparable to $q/4$.
 - **Symmetric variant**: this project implements secret-key LWE, not the full public-key scheme.
 - **Outlook**: the quadratic size of the matrix $A$ motivates moving to **Ring-LWE** ($\mathbb{Z}_q[X]/(X^n+1)$) and to **Kyber/ML-KEM**; a natural direction to extend the project.
 
